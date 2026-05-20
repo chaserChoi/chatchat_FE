@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router';
 
 // 더미 데이터
 const dummyRooms = [
@@ -9,6 +10,12 @@ const dummyRooms = [
 ];
 
 const RoomList: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleEnterRoom = (roomId: number) => {
+    navigate(`/rooms/${roomId}`);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -23,6 +30,7 @@ const RoomList: React.FC = () => {
           <div
             key={room.id}
             className="flex flex-col justify-between p-4 transition-shadow bg-white border border-gray-200 shadow-sm cursor-pointer rounded-xl hover:shadow-md"
+            onClick={() => handleEnterRoom(room.id)}
           >
             <div className="flex items-start justify-between">
               <h3 className="text-lg font-semibold text-gray-900 truncate">{room.name}</h3>

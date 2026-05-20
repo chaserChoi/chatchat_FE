@@ -10,6 +10,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // 전역(global) 객체를 빈 객체로 정의하여 sockjs-client 호환성 문제 해결
+  define: {
+    global: {},
+  },
   server: {
     proxy: {
       // 일반 REST API 프록시

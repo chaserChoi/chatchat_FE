@@ -1,13 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
 import useAuthStore from '@/features/auth/store/useAuthStore';
+import useChatStore, {type ChatMessage } from '@/features/chat/store/useChatStore';
+import { stompClient } from '@/features/chat/api/stompClient';
 
 const MainLayout: React.FC = () => {
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+  const { currentRoomId } = useChatStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) return;
+
+    const connectAndSubscribe = () => {
+      stompClient.onConnect = (frame) => {
+        console.log('Notification channel connected: ' + frame);
+
+        // 개인 알림 채널 구독
+        stompClient.subscribe(`/user/queue/notifications`, (message) => {
+          if (message.body) {
+            const notification: ChatMessage = JSON.parse(message.body);
+            
+            // 현재 보고 있는 채팅방이 아닐 경우에만 알림을 띄움
+            if (notification.roomId !== currentRoomId) {
+              toast.info(`New message in Room ${notification.roomId}: "${notification.content}"`);
+            }
+          }
+        });
+      };
+
+      stompClient.activate();
+    };
+
+    connectAndSubscribe();
+
+    return () => {
+      if (stompClient.connected) {
+        stompClient.deactivate();
+      }
+    };
+  }, [user, currentRoomId]);
 
   const handleLogout = () => {
     logout();
+    if (stompClient.connected) {
+      stompClient.deactivate();
+    }
     navigate('/login');
   };
 
