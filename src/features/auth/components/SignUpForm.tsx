@@ -1,94 +1,78 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 const SignUpForm: React.FC = () => {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [nickname, setNickname] = useState<string>('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Implement sign-up logic with API
     console.log('Sign-up attempt:', { username, password, nickname });
     navigate('/login');
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
-      <div className="text-center">
-        <h2 className="text-3xl font-extrabold text-gray-900">Sign Up</h2>
-        <p className="mt-2 text-sm text-gray-600">Create a new account</p>
-      </div>
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4 rounded-md shadow-sm">
-          <div>
-            <label htmlFor="username" className="sr-only">
-              Username
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              required
-              className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none rounded-t-md appearance-none focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="sr-only">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="nickname" className="sr-only">
-              Nickname
-            </label>
-            <input
-              id="nickname"
-              name="nickname"
-              type="text"
-              required
-              className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none rounded-b-md appearance-none focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              placeholder="Nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-            />
-          </div>
+    <div className="relative z-10 w-full max-w-md">
+      <div className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-card backdrop-blur-sm sm:p-10">
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl font-bold text-surface-900">회원가입</h2>
+          <p className="mt-2 text-sm text-surface-500">CHATCHAT에 오신 것을 환영해요</p>
         </div>
 
-        <div>
-          <button
-            type="submit"
-            className="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Sign up
-          </button>
-        </div>
-        <div className="text-sm text-center">
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <Input
+            label="아이디"
+            id="signup-username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            required
+            placeholder="사용할 아이디"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <Input
+            label="비밀번호"
+            id="signup-password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            placeholder="8자 이상 권장"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Input
+            label="닉네임"
+            id="nickname"
+            name="nickname"
+            type="text"
+            required
+            placeholder="채팅에 표시될 이름"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+          />
+
+          <Button type="submit" variant="secondary" fullWidth size="lg" className="mt-2">
+            가입하기
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-surface-500">
+          이미 계정이 있으신가요?{' '}
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-semibold text-brand-700 underline-offset-2 hover:underline"
           >
-            Already have an account? Sign in
+            로그인
           </button>
-        </div>
-      </form>
+        </p>
+      </div>
     </div>
   );
 };

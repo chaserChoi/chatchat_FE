@@ -7,7 +7,7 @@ import AuthLayout from './layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
-import RoomList from './features/room/components/RoomList';
+import ChatEmpty from './features/chat/components/ChatEmpty';
 import ChatRoom from './features/chat/components/ChatRoom';
 
 function App() {
@@ -25,22 +25,23 @@ function App() {
 
           {/* Main Application Routes */}
           <Route element={<MainLayout />}>
-            <Route path="/rooms" element={<RoomList />} />
+            <Route path="/rooms" element={<ChatEmpty />} />
             <Route path="/rooms/:roomId" element={<ChatRoom />} />
           </Route>
         </Routes>
       </BrowserRouter>
       <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
+        position="top-center"
+        autoClose={3500}
+        hideProgressBar
+        newestOnTop
         closeOnClick
-        rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme="colored"
+        className="!top-4"
+        toastClassName="!rounded-2xl !shadow-card !font-sans"
       />
     </>
   );

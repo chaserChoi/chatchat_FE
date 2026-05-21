@@ -1,77 +1,59 @@
-import React from 'react';
-import { useNavigate } from 'react-router';
-
-// 더미 데이터
-const dummyRooms = [
-  { id: 1, name: '일반 채팅방 1', headCount: 5, isSecret: false },
-  { id: 2, name: '비밀 채팅방 1', headCount: 2, isSecret: true },
-  { id: 3, name: '팀 프로젝트 회의', headCount: 10, isSecret: false },
-  { id: 4, name: '나만의 비밀방', headCount: 1, isSecret: true },
-];
+import React, { useState } from 'react';
+import RoomListItem from '@/features/room/components/RoomListItem';
+import { dummyRooms } from '@/features/room/data/dummyRooms';
+import Button from '@/components/ui/Button';
 
 const RoomList: React.FC = () => {
-  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
-  const handleEnterRoom = (roomId: number) => {
-    navigate(`/rooms/${roomId}`);
-  };
+  const filtered = dummyRooms.filter((room) =>
+    room.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">채팅방 목록</h2>
-        <button className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          방 만들기
-        </button>
+    <div className="flex h-full flex-col">
+      <div className="shrink-0 space-y-3 px-4 pb-3 pt-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-bold text-surface-900">채팅</h2>
+          <Button variant="secondary" size="sm" className="shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            새 방
+          </Button>
+        </div>
+        <div className="relative">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="search"
+            placeholder="채팅방 검색"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border-0 bg-surface-200/80 py-2.5 pr-3 pl-10 text-sm text-surface-900 placeholder:text-surface-400 focus:bg-white focus:ring-2 focus:ring-brand-400/30 focus:outline-none"
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {dummyRooms.map((room) => (
-          <div
-            key={room.id}
-            className="flex flex-col justify-between p-4 transition-shadow bg-white border border-gray-200 shadow-sm cursor-pointer rounded-xl hover:shadow-md"
-            onClick={() => handleEnterRoom(room.id)}
-          >
-            <div className="flex items-start justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">{room.name}</h3>
-              {room.isSecret && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5 text-gray-400 shrink-0"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-            </div>
-            <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
-              <div className="flex items-center space-x-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                <span>{room.headCount}명 참여 중</span>
-              </div>
-              <button className="text-indigo-600 hover:text-indigo-800">입장</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ul className="scrollbar-thin flex-1 space-y-0.5 overflow-y-auto px-2 pb-4">
+        {filtered.length === 0 ? (
+          <li className="px-4 py-8 text-center text-sm text-surface-400">검색 결과가 없습니다</li>
+        ) : (
+          filtered.map((room) => (
+            <li key={room.id}>
+              <RoomListItem room={room} />
+            </li>
+          ))
+        )}
+      </ul>
     </div>
   );
 };

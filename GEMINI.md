@@ -89,6 +89,7 @@ src/
 ├── services/        # Axios 인스턴스, STOMP/SockJS 클라이언트 기본 설정 등 네트워크 셋업
 ├── store/           # 전역적으로 공유되어야 하는 Zustand 스토어 (예: 다크모드, 전역 알림 상태)
 └── utils/           # 날짜/시간 포맷 변환 등 도메인과 무관한 순수 유틸리티 함수
+```
 
 ## 5. Build Tool & Config (Vite 환경 규칙)
 

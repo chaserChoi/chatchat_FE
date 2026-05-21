@@ -1,79 +1,67 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 const LoginForm: React.FC = () => {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Implement login logic
     console.log('Login attempt:', { username, password });
-    // 임시로 로그인 후 방 목록으로 이동하도록 설정
     navigate('/rooms');
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
-      <div className="text-center">
-        <h2 className="text-3xl font-extrabold text-gray-900">CHATCHAT</h2>
-        <p className="mt-2 text-sm text-gray-600">Please sign in to your account</p>
-      </div>
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4 rounded-md shadow-sm">
-          <div>
-            <label htmlFor="username" className="sr-only">
-              Username
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              required
-              className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none rounded-t-md appearance-none focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="sr-only">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none rounded-b-md appearance-none focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+    <div className="relative z-10 w-full max-w-md">
+      <div className="rounded-3xl border border-white/60 bg-white/90 p-8 shadow-card backdrop-blur-sm sm:p-10">
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl font-bold text-surface-900">로그인</h2>
+          <p className="mt-2 text-sm text-surface-500">아이디와 비밀번호로 시작하세요</p>
         </div>
 
-        <div>
-          <button
-            type="submit"
-            className="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Sign in
-          </button>
-        </div>
-        <div className="text-sm text-center">
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <Input
+            label="아이디"
+            id="username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            required
+            placeholder="아이디를 입력하세요"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <Input
+            label="비밀번호"
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            placeholder="비밀번호를 입력하세요"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <Button type="submit" variant="primary" fullWidth size="lg" className="mt-2">
+            로그인
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-surface-500">
+          계정이 없으신가요?{' '}
           <button
             type="button"
             onClick={() => navigate('/signup')}
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-semibold text-brand-700 underline-offset-2 hover:underline"
           >
-            Don't have an account? Sign up
+            회원가입
           </button>
-        </div>
-      </form>
+        </p>
+      </div>
     </div>
   );
 };

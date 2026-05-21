@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { stompClient } from '../api/stompClient';
-import useChatStore, {type ChatMessage } from '../store/useChatStore';
+import { stompClient } from '@/features/chat/api/stompClient';
+import useChatStore, { type ChatMessage } from '@/features/chat/store/useChatStore';
 import useAuthStore from '@/features/auth/store/useAuthStore';
+import { getRoomById } from '@/features/room/data/dummyRooms';
+import MessageBubble from '@/features/chat/components/MessageBubble';
 
 const ChatRoom: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -11,8 +13,8 @@ const ChatRoom: React.FC = () => {
   const { user } = useAuthStore();
   const [inputMessage, setInputMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const room = roomId ? getRoomById(roomId) : undefined;
 
-  // 자동 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -24,16 +26,13 @@ const ChatRoom: React.FC = () => {
   useEffect(() => {
     if (!roomId) return;
 
-    // 방에 들어왔을 때 초기화
     setCurrentRoomId(roomId);
-    setMessages([]); // 실제로는 과거 메시지를 fetch 해와야 함
+    setMessages([]);
 
-    // STOMP 연결 및 구독
     const connectAndSubscribe = () => {
       stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
 
-        // 해당 채팅방 구독
         stompClient.subscribe(`/topic/chat.room.${roomId}`, (message) => {
           if (message.body) {
             const newMsg: ChatMessage = JSON.parse(message.body);
@@ -53,7 +52,6 @@ const ChatRoom: React.FC = () => {
     connectAndSubscribe();
 
     return () => {
-      // 컴포넌트 언마운트 시 구독 해제 및 상태 초기화
       setCurrentRoomId(null);
       if (stompClient.connected) {
         stompClient.deactivate();
@@ -69,8 +67,7 @@ const ChatRoom: React.FC = () => {
         content: inputMessage,
         senderId: user?.id || 'anonymous',
       };
-      
-      // 메시지 전송
+
       stompClient.publish({
         destination: `/app/chat.send.${roomId}`,
         body: JSON.stringify(messagePayload),
@@ -80,67 +77,85 @@ const ChatRoom: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 shrink-0">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate('/rooms')}
-            className="mr-4 text-gray-500 hover:text-gray-700"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h2 className="text-xl font-bold text-gray-800">Room {roomId}</h2>
+    <div className="flex h-full min-h-0 flex-col">
+      <header className="flex shrink-0 items-center gap-3 border-b border-surface-200/50 bg-white/95 px-4 py-3 backdrop-blur-md">
+        <button
+          type="button"
+          onClick={() => navigate('/rooms')}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-surface-600 transition-colors hover:bg-surface-100 md:hidden"
+          aria-label="채팅 목록으로"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-lg font-bold text-surface-900">
+            {room?.name ?? `채팅방 ${roomId}`}
+          </h1>
+          <p className="text-xs text-surface-500">
+            {room?.isSecret ? '🔒 비밀 채팅방' : `${room?.headCount ?? 0}명 참여 중`}
+          </p>
         </div>
-      </div>
+        <button
+          type="button"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-surface-500 hover:bg-surface-100"
+          title="메뉴"
+          aria-label="채팅방 메뉴"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </button>
+      </header>
 
-      {/* Messages Area */}
-      <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-        <div className="flex flex-col space-y-4">
-          {messages.map((msg, index) => {
-            const isMe = msg.sender.id === user?.id;
-            return (
-              <div key={index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-xs md:max-w-md px-4 py-2 rounded-2xl ${
-                    isMe
-                      ? 'bg-indigo-600 text-white rounded-br-none'
-                      : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
-                  }`}
-                >
-                  {!isMe && <span className="block mb-1 text-xs font-semibold text-gray-500">{msg.sender.nickname}</span>}
-                  <p className="text-sm break-words">{msg.content}</p>
-                </div>
-              </div>
-            );
-          })}
+      <div className="scrollbar-thin flex-1 overflow-y-auto px-4 py-4">
+        <div className="mx-auto flex max-w-3xl flex-col gap-3">
+          {messages.length === 0 && (
+            <div className="py-12 text-center">
+              <p className="text-sm text-surface-500/90">아직 메시지가 없어요. 첫 인사를 건네보세요!</p>
+            </div>
+          )}
+          {messages.map((msg, index) => (
+            <MessageBubble key={msg.id ?? index} message={msg} isMe={msg.sender.id === user?.id} />
+          ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 bg-white border-t border-gray-200 shrink-0 rounded-b-xl">
-        <form onSubmit={sendMessage} className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+      <footer className="shrink-0 border-t border-surface-200/40 bg-white/95 px-3 py-3 backdrop-blur-md safe-bottom">
+        <form onSubmit={sendMessage} className="mx-auto flex max-w-3xl items-end gap-2">
+          <button
+            type="button"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-surface-500 transition-colors hover:bg-surface-100"
+            title="파일 첨부"
+            aria-label="파일 첨부"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 4 0 108.486 8.486L20.5 13" />
+            </svg>
+          </button>
+          <div className="relative min-w-0 flex-1">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder="메시지를 입력하세요"
+              className="w-full rounded-2xl border border-surface-200 bg-surface-50 px-4 py-3 pr-12 text-[15px] text-surface-900 placeholder:text-surface-400 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+            />
+          </div>
           <button
             type="submit"
-            disabled={!inputMessage.trim() || !stompClient.connected}
-            className="p-2 text-white bg-indigo-600 rounded-full hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            disabled={!inputMessage.trim()}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-900 text-white transition-all hover:bg-surface-800 disabled:bg-surface-300 disabled:cursor-not-allowed"
+            aria-label="메시지 보내기"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
             </svg>
           </button>
         </form>
-      </div>
+      </footer>
     </div>
   );
 };
